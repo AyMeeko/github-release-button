@@ -1,21 +1,60 @@
-// contentScript.js
+// checking if a button should be inserted
+function getMetaContentByProperty(property) {
+  const metaTag = document.querySelector(`meta[property="${property}"]`);
+  return metaTag ? metaTag.getAttribute('content') : null;
+}
 
-// Create a new button element
-const button = document.createElement('button');
+function getMetaContentByName(name) {
+  const metaTag = document.querySelector(`meta[name="${name}"]`);
+  return metaTag ? metaTag.getAttribute('content') : null;
+}
 
-// Set the button's text
-button.innerText = 'Click Me!';
+function insertAfter(referenceNode, newNode) {
+	referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
 
-// Add some styles to the button
-button.style.position = 'fixed';
-button.style.bottom = '10px';
-button.style.right = '10px';
-button.style.zIndex = '1000';
+let repoName = getMetaContentByName('octolytics-dimension-repository_nwo');
+let apiUrl = 'https://api.github.com/repos/' + repoName + '/releases/latest';
 
-// Add an event listener to the button
-button.addEventListener('click', () => {
-  alert('Button clicked!');
-});
+fetch(apiUrl, {
+	headers: {
+		'Accept': 'application/vnd.github+json',
+		'X-GitHub-Api-Version': '2022-11-28'
+	}
+})
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		renderButton();
+	})
+	.catch(_ => {
+	});
 
-// Append the button to the body of the web page
-document.body.appendChild(button);
+function renderButton() {
+	let url = getMetaContentByProperty('og:url') + '/releases/latest';
+	// creating the button
+	const container = document.createElement('div');
+	container.style.display = 'flex';
+	container.style.justifyContent = 'center';
+	container.style.alignItems = 'center';
+
+	const button = document.createElement('a');
+
+	button.innerText = 'Latest Release';
+
+	button.style.padding = '20px 40px';
+	button.style.border = '1px outset buttonborder';
+	button.style.borderRadius = '3px';
+	button.style.color = '#ffffff';
+	button.style.backgroundColor = '#238636';
+	button.style.textDecoration = 'none';
+	button.style.marginTop = '10px';
+	button.style.width = '65%';
+	button.style.textAlign = 'center';
+	button.href = url;
+
+	container.appendChild(button)
+	var header = document.getElementById('repository-container-header');
+	insertAfter(header, container)
+};
