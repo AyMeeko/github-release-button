@@ -1,0 +1,2 @@
+- update the extension icon set
+- create a popup when users click the extension icon
